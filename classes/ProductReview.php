@@ -2,55 +2,70 @@
 if (!defined('_PS_VERSION_'))
     exit;
 
-class ProductReview extends ObjectModel
-{
-    public $id_review;
-    public $id_shop;
-    public $id_product;
-    public $id_customer;
-    public $rating;
-    public $title;
-    public $content;
-    public $date_add;
-    public $status;
-
-    public static $definition = array(
-        'table' => 'product_review',
-        'primary' => 'id_review',
-        'multilang' => false,
-        'fields' => array(
-            'id_shop' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'id_product' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'id_customer' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
-            'rating' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => true),
-            'title' => array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'required' => true, 'size' => 128),
-            'content' => array('type' => self::TYPE_HTML, 'validate' => 'isCleanHtml', 'required' => true),
-            'date_add' => array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => false),
-            'status' => array('type' => self::TYPE_BOOL, 'validate' => 'isBool')
-        )
-    );
-
-    const STATUS_PENDING = 0;
-    const STATUS_APPROVED = 1;
-    const STATUS_DECLINED = 2;
-
-    public function __construct($id = null)
+    class ProductReview extends ObjectModel
     {
-        parent::__construct($id);
-    }
-
-    public function add($autodate = true, $null_values = false)
-    {
-        if ($autodate && property_exists($this, 'date_add')) {
-            $this->date_add = date('Y-m-d H:i:s');
-        }
+        public $id_review;
+        public $id_shop;
+        public $id_product;
+        public $id_customer;
         
-        if (!isset($this->status) || $this->status === null) {
-            $this->status = self::STATUS_PENDING;
-        }
+        // Removed the old public $rating;
+        // Keep only the 5 new rating fields:
+        public $rating_effectiveness;
+        public $rating_texture;
+        public $rating_absorption;
+        public $rating_scent;
+        public $rating_value_for_money;
+    
+        public $title;
+        public $content;
+        public $date_add;
+        public $status;
         
-        return parent::add($autodate, $null_values);
-    }
+        public static $definition = array(
+            'table' => 'product_review',
+            'primary' => 'id_review',
+            'multilang' => false,
+            'fields' => array(
+                'id_shop'       => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+                'id_product'    => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+                'id_customer'   => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+    
+                // Only the new rating fields
+                'rating_effectiveness'   => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => false),
+                'rating_texture'         => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => false),
+                'rating_absorption'      => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => false),
+                'rating_scent'           => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => false),
+                'rating_value_for_money' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedInt', 'required' => false),
+    
+                'title'   => array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'required' => true, 'size' => 128),
+                'content' => array('type' => self::TYPE_HTML, 'validate' => 'isCleanHtml', 'required' => true),
+                'date_add'=> array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => false),
+                'status'  => array('type' => self::TYPE_BOOL, 'validate' => 'isBool')
+            )
+        );
+    
+        const STATUS_PENDING = 0;
+        const STATUS_APPROVED = 1;
+        const STATUS_DECLINED = 2;
+    
+        public function __construct($id = null)
+        {
+            parent::__construct($id);
+        }
+    
+        public function add($autodate = true, $null_values = false)
+        {
+            if ($autodate && property_exists($this, 'date_add')) {
+                $this->date_add = date('Y-m-d H:i:s');
+            }
+            
+            if (!isset($this->status)) {
+                $this->status = self::STATUS_PENDING;
+            }
+            
+            return parent::add($autodate, $null_values);
+        }
 
     public static function getReviewsByProduct($id_product, $approved_only = true)
     {

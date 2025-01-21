@@ -15,15 +15,24 @@ $(document).ready(function() {
             data: {
                 id_product: $form.find('input[name="id_product"]').val(),
                 secure_key: $form.find('input[name="secure_key"]').val(),
-                rating: $form.find('select[name="rating"]').val(),
+                
+                // Instead of 'rating', send the five new fields:
+                rating_effectiveness: $form.find('select[name="rating_effectiveness"]').val(),
+                rating_texture: $form.find('select[name="rating_texture"]').val(),
+                rating_absorption: $form.find('select[name="rating_absorption"]').val(),
+                rating_scent: $form.find('select[name="rating_scent"]').val(),
+                rating_value_for_money: $form.find('select[name="rating_value_for_money"]').val(),
+
                 title: $form.find('input[name="title"]').val(),
                 content: $form.find('textarea[name="content"]').val(),
+
+                // Always include your action if needed by the controller
                 action: 'submitReview'
             },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    // Replace the entire form with the pending message
+                    // Replace the form with a "pending approval" message
                     var pendingMessage = '';
                     if ($('html').attr('lang') === 'el') {
                         pendingMessage = '<div class="alert alert-warning"><p>Η κριτική σας έχει υποβληθεί και βρίσκεται σε αναμονή έγκρισης. Παρακαλώ περιμένετε την έγκριση πριν υποβάλετε νέα κριτική.</p></div>';
@@ -41,9 +50,9 @@ $(document).ready(function() {
             },
             error: function() {
                 // Show error message
-                var errorMessage = $('html').attr('lang') === 'el' ? 
-                    'Παρουσιάστηκε σφάλμα κατά την υποβολή της κριτικής σας' : 
-                    'An error occurred while submitting your review';
+                var errorMessage = $('html').attr('lang') === 'el' 
+                    ? 'Παρουσιάστηκε σφάλμα κατά την υποβολή της κριτικής σας' 
+                    : 'An error occurred while submitting your review';
                 var errorHtml = '<div class="alert alert-danger">' + errorMessage + '</div>';
                 $form.find('.alert-danger').remove();
                 $form.prepend(errorHtml);

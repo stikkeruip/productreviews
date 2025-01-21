@@ -62,12 +62,19 @@ class Productreviews extends Module
 
     private function createTables()
     {
-        $sql = "CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "product_review` (
+        $sql_create = "CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "product_review` (
             `id_review` int(10) unsigned NOT NULL AUTO_INCREMENT,
             `id_shop` int(10) unsigned NOT NULL DEFAULT '1',
             `id_product` int(10) unsigned NOT NULL,
             `id_customer` int(10) unsigned NOT NULL,
-            `rating` tinyint(1) unsigned NOT NULL,
+            /* Removed the old rating column */
+    
+            `rating_effectiveness` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            `rating_texture` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            `rating_absorption` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            `rating_scent` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            `rating_value_for_money` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+    
             `title` varchar(128) NOT NULL,
             `content` text NOT NULL,
             `date_add` datetime NOT NULL,
@@ -77,9 +84,31 @@ class Productreviews extends Module
             KEY `id_customer` (`id_customer`),
             KEY `id_shop` (`id_shop`)
         ) ENGINE=" . _MYSQL_ENGINE_ . " DEFAULT CHARSET=utf8;";
-
-        return Db::getInstance()->execute($sql);
+        
+        // 1) Create table if not exists
+        $result1 = Db::getInstance()->execute($sql_create);
+    
+        // 2) In case the columns aren’t added yet (they should be from the create above),
+        //    you can attempt an ALTER if needed. This typically won't be necessary
+        //    unless you're upgrading an existing install.
+        $sql_alter = 'ALTER TABLE `'._DB_PREFIX_.'product_review`
+            ADD `rating_effectiveness` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            ADD `rating_texture` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            ADD `rating_absorption` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            ADD `rating_scent` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
+            ADD `rating_value_for_money` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0';
+    
+        try {
+            $result2 = Db::getInstance()->execute($sql_alter);
+        } catch (Exception $e) {
+            // Possibly columns already exist
+            $result2 = true;
+        }
+    
+        return ($result1 && $result2);
     }
+    
+
 
     private function dropTables()
     {
